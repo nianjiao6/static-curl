@@ -564,6 +564,9 @@ compile_ares() {
     url="${URL}"
     download_and_extract "${url}"
 
+    # Patch: fallback DNS to 114.114.114.114 when resolv.conf is missing (e.g. Android)
+    sed -i 's/htonl(INADDR_LOOPBACK)/htonl(0x72727272) \/* 114.114.114.114 *\//' src/lib/ares_init.c
+
     ./configure --host="${TARGET}" --prefix="${PREFIX}" --enable-static --disable-shared;
     make -j "$(nproc)";
     make install;
@@ -842,7 +845,7 @@ curl_config() {
         --enable-alt-svc --enable-websockets \
         --enable-ipv6 --enable-unix-sockets --enable-socketpair \
         --enable-headers-api --enable-versioned-symbols \
-        --enable-threaded-resolver --enable-optimize \
+        --disable-threaded-resolver --enable-optimize \
         --enable-warnings \
         --enable-dict --enable-netrc \
         --enable-bearer-auth --enable-tls-srp --enable-dnsshuffle \
